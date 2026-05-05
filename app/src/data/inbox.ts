@@ -1,11 +1,29 @@
 // src/data/inbox.ts
 // Per-loan email thread events for the Inbox patterns E/F/G.
 // Backend-free POC — all events are seeded.
+//
+// At runtime we never mutate `threads`. Resolution state lives in
+// `AppContext.resolvedDecisions` (a Record<eventId, choice>). Inbox renders
+// merge that map over the seed at display time. See docs/INBOX.md.
 
 import { borrower } from './borrower';
 
+/**
+ * Per-loan email address. Format: `file+<loan_number>@evrylo.com`.
+ * Used as the From of every agent reply and the Cc of every ghost-written
+ * outbound — replies routed to this address are auto-tracked to the file.
+ */
 export const loanEmailAddress = `file+${borrower.loan_number}@evrylo.com`;
 
+/**
+ * Event kinds in an inbox thread. Maps to the three documented agent patterns:
+ *   - `inbound-forward` — Steph forwarded something to file+...@evrylo.com
+ *   - `agent-report`    — Pattern F (forward → analysis report)
+ *   - `agent-decision`  — Pattern E (boolean question with one-tap reply)
+ *   - `agent-outbound`  — Pattern G (agent ghost-wrote on Steph's behalf)
+ *   - `borrower-reply`  — reserved; not seeded yet
+ *   - `note`            — plain inline note (used for chat-with-me follow-up)
+ */
 export type ThreadEventKind =
   | 'inbound-forward'
   | 'agent-report'
@@ -190,6 +208,12 @@ export const threads: InboxThread[] = [
   },
 ];
 
+/**
+ * Counts agent-decision events still awaiting Steph's reply.
+ *
+ * @param resolvedMap — pass `AppContext.resolvedDecisions` to get the live
+ *   count. Omit only if you want the seed-only count (rare).
+ */
 export function unresolvedDecisionCount(
   thread: InboxThread,
   resolvedMap: Record<string, string> = {},

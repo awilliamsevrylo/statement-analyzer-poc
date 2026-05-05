@@ -1,14 +1,31 @@
 // src/components/UI.tsx
-// Reusable UI primitives used across the Evrylo app.
+// Reusable UI primitives used across the Evrylo app. This is the canonical
+// design-system module — all `Btn`, `Badge`, `Card`, formatters, and icons
+// route through here. Don't reinvent these inline.
+//
+// See docs/COMPONENTS.md for the full catalog and docs/STYLE.md for tone rules.
 
 import type { ReactNode } from 'react';
 
 // ── class utility ─────────────────────────────────────────────────────────────
+/**
+ * Filter falsy values and join with spaces. Lighter than `clsx`; we don't need
+ * its merging logic since we don't combine arbitrary class strings.
+ *
+ * @example cls('base', condition && 'extra', className)
+ */
 export function cls(...xs: (string | false | null | undefined)[]) {
   return xs.filter(Boolean).join(' ');
 }
 
 // ── formatters ──────────────────────────────────────────────────────────────
+/**
+ * USD formatter. Always returns absolute value with a `$` prefix.
+ * Caller is responsible for negative-sign rendering on debits if desired.
+ *
+ * @param opts.sign — when true and n>0, prepend `+` (used for net deltas)
+ * @param opts.decimals — defaults to 2; pass 0 for whole-dollar display
+ */
 export function fmtUSD(n: number, opts?: { sign?: boolean; decimals?: number }) {
   const s = opts?.sign && n > 0 ? '+' : '';
   return s + '$' + Math.abs(n).toLocaleString('en-US', {
@@ -17,6 +34,7 @@ export function fmtUSD(n: number, opts?: { sign?: boolean; decimals?: number }) 
   });
 }
 
+/** Short MM/DD format. ISO must be `YYYY-MM-DD`; midnight local-time is assumed. */
 export function fmtDate(iso: string) {
   const d = new Date(iso + 'T00:00:00');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -24,12 +42,20 @@ export function fmtDate(iso: string) {
   return `${mm}/${dd}`;
 }
 
+/** Long "April 15, 2026" format. */
 export function fmtLongDate(iso: string) {
   const d = new Date(iso + 'T00:00:00');
   return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
 // ── Badge ─────────────────────────────────────────────────────────────────────
+/**
+ * Tone tokens that drive `Badge` and `SeverityBadge` styling.
+ * `rent` is a one-off blue tone used by the Undisclosed-Debts table to call
+ * out rows that look like rent against a 1003 that says the borrower owns.
+ *
+ * Adding a tone? Update both `BadgeTone` and `BADGE_TONES`.
+ */
 export type BadgeTone = 'neutral' | 'primary' | 'critical' | 'warning' | 'info' | 'success' | 'rent';
 
 const BADGE_TONES: Record<BadgeTone, string> = {
@@ -71,6 +97,11 @@ export function SeverityBadge({ severity }: { severity: Severity }) {
 }
 
 // ── Card ──────────────────────────────────────────────────────────────────────
+/**
+ * Standard container: `rounded-xl border border-slate-200 bg-white shadow-sm`.
+ * Override via `className`. Always go through this component instead of
+ * hand-rolling card chrome at the call site.
+ */
 export function Card({ children, className, onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
   return (
     <div className={cls('rounded-xl border border-slate-200 bg-white shadow-sm', className)} onClick={onClick}>
@@ -80,6 +111,11 @@ export function Card({ children, className, onClick }: { children: ReactNode; cl
 }
 
 // ── Button ────────────────────────────────────────────────────────────────────
+/**
+ * Button variants. Use `primary` (orange) sparingly — only the single most
+ * important CTA on the screen. Default to `secondary` for most buttons.
+ * `ghost` is for tertiary row actions. `danger` and `success` are rare here.
+ */
 export type BtnVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
 
 const BTN_VARIANTS: Record<BtnVariant, string> = {
@@ -90,6 +126,11 @@ const BTN_VARIANTS: Record<BtnVariant, string> = {
   success:  'bg-emerald-600 text-white hover:bg-emerald-700',
 };
 
+/**
+ * Renders `<a>` if `href` is given, otherwise `<button type="button">`.
+ * `disabled` applies `cursor-not-allowed opacity-50 pointer-events-none` —
+ * don't add those classes by hand at the call site.
+ */
 export function Btn({
   variant = 'primary',
   children,
@@ -136,6 +177,11 @@ export function ConfidenceBar({ value }: { value: number }) {
 }
 
 // ── Inline SVG Icons (lucide-style, 16px, strokeWidth=2) ─────────────────────
+//
+// All icons are inline SVGs to avoid pulling in lucide-react at runtime. Use
+// these as React nodes: `<button>{I.search}</button>`. To add a new icon, copy
+// the path data from lucide.dev and add it to the `I` export. Don't import
+// lucide-react ad hoc.
 function Icon({
   children,
   size = 16,

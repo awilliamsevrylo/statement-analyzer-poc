@@ -1,6 +1,15 @@
 // src/data/borrower.ts
 // Borrower-driven scenario: Marcus Chen, refi on a 4-plex investment property,
 // W-2 + rental + a little side business.
+//
+// This is the central mock dataset for the workbench. Most pages
+// (`/jobs/<id>/...`, `/report/<id>`, `/inbox`) read from here. The shape is
+// shared across all six workbench tabs — touching one of these exports is
+// likely to ripple, so see docs/DATA_MODEL.md before changing types.
+//
+// All amounts in USD. All dates ISO `YYYY-MM-DD`. Statement gaps in
+// `missingMonths`. Severity tags drive the colored borders / chips you see in
+// the UI: critical=rose, warning=amber, info=sky.
 
 export interface Borrower {
   name: string;
@@ -84,15 +93,20 @@ export const missingMonths: MissingMonth[] = [
   { account: 'Wells Fargo ****7842', month: 'Sep 2025', reason: 'Statement not uploaded — gap between Aug and Oct cycle' },
 ];
 
+/**
+ * Classification applied to every transaction by the (mock) analysis engine.
+ * Each value drives a badge tone, a reason string, and which workbench tabs
+ * the transaction surfaces under.
+ */
 export type Disposition =
-  | 'ELIGIBLE_W2'
-  | 'INTERNAL_TRANSFER'
-  | 'TRANSFER_FROM_UNRECOGNIZED'
-  | 'LARGE_DEPOSIT_ABOVE_INCOME'
-  | 'LARGE_DEPOSIT_BELOW_THRESHOLD'
-  | 'UNDISCLOSED_DEBT_MATCH'
-  | 'FILTERED_DEBIT'
-  | 'EARNEST_MONEY';
+  | 'ELIGIBLE_W2'                   // recurring W-2 payroll, counts toward qualifying income
+  | 'INTERNAL_TRANSFER'             // matched paired leg between two known accounts
+  | 'TRANSFER_FROM_UNRECOGNIZED'    // critical — source account not in statement set
+  | 'LARGE_DEPOSIT_ABOVE_INCOME'    // warning — exceeds 50% of monthly gross
+  | 'LARGE_DEPOSIT_BELOW_THRESHOLD' // info — logged but does not require sourcing
+  | 'UNDISCLOSED_DEBT_MATCH'        // critical — recurring lender pattern not on credit report
+  | 'FILTERED_DEBIT'                // standard retail; filtered out of analysis
+  | 'EARNEST_MONEY';                // detected escrow debit; triggers a sourcing chain
 
 export interface Transaction {
   id: string;
