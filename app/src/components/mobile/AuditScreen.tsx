@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/mobile/AuditScreen.tsx
 import { useState, useMemo } from 'react';
 import { mcls, MCard, MBadge, MAppBar, MSectionLabel, MI, mFmtUSD } from './MobileUI';

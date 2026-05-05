@@ -1,6 +1,10 @@
+'use client';
+
 // src/components/SideNav.tsx
 // 260px sidebar for the file workbench.
 
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { cls, Badge } from './UI';
 
 const TABS = [
@@ -13,24 +17,25 @@ const TABS = [
 ];
 
 export default function SideNav({ activeTab = 'summary' }: { activeTab?: string }) {
+  const params = useParams<{ jobId?: string }>();
+  const jobId = params?.jobId ?? 'LO-2026-04823';
+
   return (
     <div className="flex h-full flex-col">
-      {/* Current file header */}
       <div className="border-b border-slate-200 px-5 py-4">
         <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Current file</div>
         <div className="mt-1 text-sm font-semibold text-slate-900">Marcus Chen</div>
-        <div className="mt-0.5 text-xs text-slate-500">LO-2026-04823</div>
+        <div className="mt-0.5 text-xs text-slate-500">{jobId}</div>
       </div>
 
-      {/* Navigation tabs */}
       <nav className="flex-1 px-3 py-3">
         <div className="space-y-0.5">
           {TABS.map((tab) => {
             const isActive = tab.id === activeTab;
             return (
-              <a
+              <Link
                 key={tab.id}
-                href={`#/jobs/LO-2026-04823/${tab.id}`}
+                href={`/jobs/${jobId}/${tab.id}`}
                 className={cls(
                   'flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                   isActive
@@ -48,13 +53,12 @@ export default function SideNav({ activeTab = 'summary' }: { activeTab?: string 
                 {tab.id === 'sourcing' && (
                   <Badge tone="primary" className="ml-auto">1 unsourced</Badge>
                 )}
-              </a>
+              </Link>
             );
           })}
         </div>
       </nav>
 
-      {/* Status section at bottom */}
       <div className="border-t border-slate-200 px-5 py-4">
         <div className="flex items-center gap-2">
           <span className="inline-block h-2 w-2 rounded-full bg-amber-400" />

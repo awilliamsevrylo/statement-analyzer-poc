@@ -1,31 +1,36 @@
+'use client';
+
 // src/components/Navbar.tsx
 // Top navigation bar for the branded header.
 
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { cls } from './UI';
+import { useAppContext } from '@/app/_components/AppContext';
 
-export default function Navbar({ onNewAnalysis }: { onNewAnalysis?: () => void }) {
-  const location = useLocation();
-  const navigate = useNavigate();
+export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
   const [query, setQuery] = useState('');
+  const { openNewAnalysis } = useAppContext();
 
-  const isFilesActive = location.pathname === '/' || location.pathname.startsWith('/jobs/');
+  const isFilesActive = pathname === '/' || pathname.startsWith('/jobs/');
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white px-7 py-4">
       {/* Left: Logo + Nav */}
       <div className="flex items-center gap-6">
-        <a href="#/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width="28" height="28" rx="6" fill="#eb7230" />
             <path d="M8 20V8h5.5c2.5 0 4 1.2 4 3.2 0 1.4-.8 2.4-2 2.9l2.8 5.9H15.5l-2.4-5.4H10.5V20H8z" fill="white" />
           </svg>
           <span className="text-sm font-semibold text-slate-900">Evrylo</span>
-        </a>
+        </Link>
         <nav className="hidden items-center gap-1 md:flex">
-          <a
-            href="#/"
+          <Link
+            href="/"
             className={cls(
               'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
               isFilesActive
@@ -34,11 +39,11 @@ export default function Navbar({ onNewAnalysis }: { onNewAnalysis?: () => void }
             )}
           >
             Files
-          </a>
+          </Link>
           {(['Templates', 'Settings'] as const).map((label) => (
             <a
               key={label}
-              href="#/"
+              href="#"
               aria-disabled="true"
               title="Coming soon"
               onClick={(e) => e.preventDefault()}
@@ -60,7 +65,7 @@ export default function Navbar({ onNewAnalysis }: { onNewAnalysis?: () => void }
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && query.trim()) {
-                navigate(`/?q=${encodeURIComponent(query.trim())}`);
+                router.push(`/?q=${encodeURIComponent(query.trim())}`);
               }
             }}
             className="h-9 w-56 rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:outline-none"
@@ -73,7 +78,7 @@ export default function Navbar({ onNewAnalysis }: { onNewAnalysis?: () => void }
         </div>
         <button
           type="button"
-          onClick={onNewAnalysis}
+          onClick={openNewAnalysis}
           className="inline-flex items-center gap-1.5 rounded-lg bg-[#eb7230] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#d96526]"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

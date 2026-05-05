@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/mobile/SourcingScreen.tsx
 import { mcls, MCard, MBadge, MAppBar, MSectionLabel, MI, mFmtUSD, toneDot } from './MobileUI';
 import { mChains } from '@/data/mobile';
@@ -72,4 +74,3 @@ export default function SourcingScreen({ onBack }: { onBack: () => void }) {
     </div>
   );
 }
-

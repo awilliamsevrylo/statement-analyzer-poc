@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/mobile/MobileApp.tsx
 import { useState } from 'react';
 import PhoneFrame from './PhoneFrame';

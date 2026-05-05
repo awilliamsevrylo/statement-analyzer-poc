@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/modals/NewAnalysisModal.tsx
 // New analysis modal with workflow selector and upload progress.
 

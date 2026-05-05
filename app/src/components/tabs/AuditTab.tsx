@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/tabs/AuditTab.tsx
 // Audit trail tab with filtering and expandable rows.
 

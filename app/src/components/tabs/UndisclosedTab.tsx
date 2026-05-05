@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/tabs/UndisclosedTab.tsx
 // Undisclosed debts tab for the workbench.
 

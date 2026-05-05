@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/mobile/PhoneFrame.tsx
 import type { ReactNode } from 'react';
 

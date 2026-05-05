@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/modals/EmailModal.tsx
 // Email composer modal with templates and sent-state.
 

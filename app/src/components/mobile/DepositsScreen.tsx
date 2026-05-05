@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/mobile/DepositsScreen.tsx
 import { useState } from 'react';
 import { mcls, MCard, MBtn, MBadge, MAppBar, MI, mFmtUSD } from './MobileUI';

@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/mobile/DebtsScreen.tsx
 import { MCard, MRing, MAppBar, MSectionLabel, MI, mFmtUSD } from './MobileUI';
 import { mDebts, mFileStats } from '@/data/mobile';

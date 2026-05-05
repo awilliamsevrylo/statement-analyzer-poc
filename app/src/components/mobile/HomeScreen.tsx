@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/mobile/HomeScreen.tsx
 import { mcls, MCard, MBtn, MBadge, MDot, MAppBar, MSectionLabel, MI, mFmtUSD } from './MobileUI';
 import { mBorrower, mFileStats, mActions, mCoverage } from '@/data/mobile';

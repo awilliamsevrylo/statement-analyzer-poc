@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/tabs/CoverageTab.tsx
 // Statement coverage tab with account cards and closing date check.
 

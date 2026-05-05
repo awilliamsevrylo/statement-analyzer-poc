@@ -1,3 +1,5 @@
+'use client';
+
 // src/components/mobile/MobileUI.tsx
 // Mobile UI primitives — small-screen variants with CSS variable theming.
 
