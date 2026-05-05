@@ -62,6 +62,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.35.0",
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
@@ -81,6 +82,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vinext": "^0.0.47",
-    "vite": "^8.0.10"
+    "vite": "^8.0.10",
+    "wrangler": "^4.87.0"
   }
 }
