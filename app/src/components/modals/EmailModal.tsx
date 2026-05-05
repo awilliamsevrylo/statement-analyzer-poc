@@ -6,7 +6,7 @@
 import { useState, useMemo } from 'react';
 import { cls, Btn, I } from '@/components/UI';
 
-export type EmailTemplate = 'missing-statement' | 'sourcing' | 'gift-letter' | 'request-statements';
+export type EmailTemplate = 'missing-statement' | 'sourcing' | 'gift-letter' | 'request-statements' | 'forward-realtor';
 
 export interface DepositContext {
   amount: number;
@@ -19,6 +19,8 @@ interface TemplateData {
   subject: string;
   body: string;
   attachments: string[];
+  to?: string;
+  cc?: string;
 }
 
 interface EmailModalProps {
@@ -53,14 +55,22 @@ function buildTemplates(ctx?: DepositContext): Record<EmailTemplate, TemplateDat
       body: `Hi Marcus,\n\nWe're ready to begin the bank statement analysis for your Conventional Refinance. Please upload the following statements to your borrower portal:\n\n- Wells Fargo ****7842 (last 2 months)\n- JPMorgan Chase ****3921 (last 2 months)\n- Wells Fargo Business ****1109 (last 2 months)\n\nOnce uploaded, our system will begin the audit automatically and flag any items that need your attention.\n\nThanks,\nStephanie Silverman\nLeaderOne Financial`,
       attachments: [],
     },
+    'forward-realtor': {
+      subject: 'Marcus Chen — 1 item left before clear-to-close',
+      to: 'jordan@bayrealtygroup.com',
+      cc: 'marcus.chen@gmail.com, file+LO-2026-04823@evrylo.com',
+      body: `Hi Jordan,\n\nLooping you in. Marcus's file is in good shape — payroll's clean, earnest money trail closes itself, and we're 5 days ahead of schedule.\n\nOne last item before we send to underwriting: statements for the source of a $14,000 transfer. I've sent Marcus the request directly (CC'd here). If you talk to him in the next day or two, a nudge helps.\n\nReplies to this thread are tracked back to the file automatically — no need to forward separately.\n\nThanks,\nSteph`,
+      attachments: [],
+    },
   };
 }
 
 export default function EmailModal({ template = 'missing-statement', depositContext, onClose }: EmailModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate>(template);
-  const [to] = useState('marcus.chen@gmail.com');
-  const [from] = useState('steph.morgan@evrylo.com');
   const templates = useMemo(() => buildTemplates(depositContext), [depositContext]);
+  const [from] = useState('steph.morgan@evrylo.com');
+  const [to, setTo] = useState(templates[template].to ?? 'marcus.chen@gmail.com');
+  const [cc, setCc] = useState(templates[template].cc ?? '');
   const [subject, setSubject] = useState(templates[template].subject);
   const [body, setBody] = useState(templates[template].body);
   const [attachments, setAttachments] = useState<string[]>(templates[template].attachments);
@@ -70,6 +80,8 @@ export default function EmailModal({ template = 'missing-statement', depositCont
   function applyTemplate(key: EmailTemplate) {
     setSelectedTemplate(key);
     const t = templates[key];
+    setTo(t.to ?? 'marcus.chen@gmail.com');
+    setCc(t.cc ?? '');
     setSubject(t.subject);
     setBody(t.body);
     setAttachments(t.attachments);
@@ -137,8 +149,8 @@ export default function EmailModal({ template = 'missing-statement', depositCont
               <input
                 type="text"
                 value={to}
-                readOnly
-                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 focus:outline-none"
+                onChange={(e) => setTo(e.target.value)}
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-slate-300 focus:outline-none"
               />
             </div>
             <div className="grid grid-cols-[60px_1fr] items-center gap-3">
@@ -150,6 +162,23 @@ export default function EmailModal({ template = 'missing-statement', depositCont
                 className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 focus:outline-none"
               />
             </div>
+            {cc && (
+              <div className="grid grid-cols-[60px_1fr] items-start gap-3">
+                <label className="mt-2 text-xs font-medium text-slate-500">Cc</label>
+                <div>
+                  <input
+                    type="text"
+                    value={cc}
+                    onChange={(e) => setCc(e.target.value)}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-slate-300 focus:outline-none"
+                  />
+                  <div className="mt-1 text-[10px] text-slate-400">
+                    Replies will be tracked to this file via{' '}
+                    <span className="font-mono">file+LO-2026-04823@evrylo.com</span>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-[60px_1fr] items-center gap-3">
               <label className="text-xs font-medium text-slate-500">Subject</label>
               <input

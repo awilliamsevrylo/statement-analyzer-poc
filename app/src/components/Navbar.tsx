@@ -8,17 +8,24 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { cls } from './UI';
 import { useAppContext } from '@/app/_components/AppContext';
-import { totalUnresolvedDecisions } from '@/data/inbox';
+import { threads } from '@/data/inbox';
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const { openNewAnalysis } = useAppContext();
+  const { openNewAnalysis, resolvedDecisions } = useAppContext();
 
   const isFilesActive = pathname === '/' || pathname.startsWith('/jobs/');
   const isInboxActive = pathname?.startsWith('/inbox') ?? false;
-  const unread = totalUnresolvedDecisions();
+  const unread = threads.reduce(
+    (acc, t) =>
+      acc +
+      t.events.filter(
+        (e) => e.kind === 'agent-decision' && e.decision && !resolvedDecisions[e.id],
+      ).length,
+    0,
+  );
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white px-7 py-4">

@@ -190,12 +190,15 @@ export const threads: InboxThread[] = [
   },
 ];
 
-export function unresolvedDecisionCount(thread: InboxThread): number {
+export function unresolvedDecisionCount(
+  thread: InboxThread,
+  resolvedMap: Record<string, string> = {},
+): number {
   return thread.events.filter(
-    (e) => e.kind === 'agent-decision' && e.decision && !e.decision.resolvedWith,
+    (e) =>
+      e.kind === 'agent-decision' &&
+      e.decision &&
+      !e.decision.resolvedWith &&
+      !resolvedMap[e.id],
   ).length;
-}
-
-export function totalUnresolvedDecisions(): number {
-  return threads.reduce((acc, t) => acc + unresolvedDecisionCount(t), 0);
 }
