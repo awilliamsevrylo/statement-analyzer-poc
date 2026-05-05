@@ -55,8 +55,17 @@ export default function AuditTab() {
               placeholder="Search transactions…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:outline-none"
+              className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-8 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:outline-none"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {I.x}
+              </button>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             {CHIP_FILTERS.map((chip, i) => (
@@ -159,10 +168,6 @@ export default function AuditTab() {
                               <div className="mt-2 flex gap-2">
                                 <Btn variant="secondary" className="h-7 px-2 text-xs">
                                   Override classification
-                                </Btn>
-                                <Btn variant="ghost" className="h-7 px-2 text-xs">
-                                  {I.file}
-                                  View source PDF
                                 </Btn>
                               </div>
                             </div>

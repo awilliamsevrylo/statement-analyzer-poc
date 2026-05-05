@@ -1,9 +1,17 @@
 // src/components/Navbar.tsx
 // Top navigation bar for the branded header.
 
-import { cls, I } from './UI';
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { cls } from './UI';
 
 export default function Navbar({ onNewAnalysis }: { onNewAnalysis?: () => void }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+
+  const isFilesActive = location.pathname === '/' || location.pathname.startsWith('/jobs/');
+
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white px-7 py-4">
       {/* Left: Logo + Nav */}
@@ -16,22 +24,27 @@ export default function Navbar({ onNewAnalysis }: { onNewAnalysis?: () => void }
           <span className="text-sm font-semibold text-slate-900">Evrylo</span>
         </a>
         <nav className="hidden items-center gap-1 md:flex">
-          {[
-            { label: 'Files', active: true },
-            { label: 'Templates', active: false },
-            { label: 'Settings', active: false },
-          ].map((item) => (
+          <a
+            href="#/"
+            className={cls(
+              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              isFilesActive
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+            )}
+          >
+            Files
+          </a>
+          {(['Templates', 'Settings'] as const).map((label) => (
             <a
-              key={item.label}
+              key={label}
               href="#/"
-              className={cls(
-                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                item.active
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-              )}
+              aria-disabled="true"
+              title="Coming soon"
+              onClick={(e) => e.preventDefault()}
+              className="cursor-not-allowed rounded-md px-3 py-1.5 text-sm font-medium text-slate-300"
             >
-              {item.label}
+              {label}
             </a>
           ))}
         </nav>
@@ -40,10 +53,16 @@ export default function Navbar({ onNewAnalysis }: { onNewAnalysis?: () => void }
       {/* Right: Search + CTA + Avatar */}
       <div className="flex items-center gap-3">
         <div className="relative hidden sm:block">
-          {I.search}
           <input
             type="text"
             placeholder="Search files…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && query.trim()) {
+                navigate(`/?q=${encodeURIComponent(query.trim())}`);
+              }
+            }}
             className="h-9 w-56 rounded-lg border border-slate-200 bg-slate-50 pl-8 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:outline-none"
           />
           <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400">

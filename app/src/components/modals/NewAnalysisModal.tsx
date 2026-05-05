@@ -273,9 +273,6 @@ export default function NewAnalysisModal({ onClose }: NewAnalysisModalProps) {
             <Btn
               onClick={runAnalysis}
               disabled={!borrowerName.trim() || files.length === 0}
-              className={cls(
-                (!borrowerName.trim() || files.length === 0) && 'cursor-not-allowed opacity-50',
-              )}
             >
               Run analysis
             </Btn>

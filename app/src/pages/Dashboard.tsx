@@ -2,7 +2,7 @@
 // Landing page — list of all loan analysis jobs.
 
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cls, Btn } from '@/components/UI';
 import { dashboardFiles, STATUS_META } from '@/data/dashboard';
 
@@ -20,19 +20,24 @@ const FILTER_MAP: Record<Filter, string | null> = {
 export default function Dashboard({ onNewAnalysis, onRetryAnalysis }: { onNewAnalysis?: () => void; onRetryAnalysis?: () => void }) {
   const [activeFilter, setActiveFilter] = useState<Filter>('All');
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const q = searchParams.get('q') ?? '';
 
   const filtered = useMemo(() => {
     const target = FILTER_MAP[activeFilter];
-    if (!target) return dashboardFiles;
-    return dashboardFiles.filter((f) => f.status === target);
-  }, [activeFilter]);
+    let list = target ? dashboardFiles.filter((f) => f.status === target) : dashboardFiles;
+    if (q) {
+      list = list.filter((f) => f.borrower.toLowerCase().includes(q.toLowerCase()));
+    }
+    return list;
+  }, [activeFilter, q]);
 
-  const stats = [
-    { label: 'Total files', value: dashboardFiles.length },
-    { label: 'Processing', value: dashboardFiles.filter((f) => f.status === 'processing').length },
-    { label: 'Completed', value: dashboardFiles.filter((f) => f.status === 'completed').length },
-    { label: 'Failed', value: dashboardFiles.filter((f) => f.status === 'failed').length },
-  ];
+  const stats = useMemo(() => [
+    { label: 'Total files', value: filtered.length },
+    { label: 'Processing', value: filtered.filter((f) => f.status === 'processing').length },
+    { label: 'Completed', value: filtered.filter((f) => f.status === 'completed').length },
+    { label: 'Failed', value: filtered.filter((f) => f.status === 'failed').length },
+  ], [filtered]);
 
   return (
     <div className="min-h-[100dvh] bg-slate-50">
@@ -93,6 +98,17 @@ export default function Dashboard({ onNewAnalysis, onRetryAnalysis }: { onNewAna
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-500">
+                    {q ? (
+                      <>No files match &ldquo;<span className="font-medium">{q}</span>&rdquo;.</>
+                    ) : (
+                      'No files.'
+                    )}
+                  </td>
+                </tr>
+              )}
               {filtered.map((file) => {
                 const meta = STATUS_META[file.status];
                 return (

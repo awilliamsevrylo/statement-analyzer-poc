@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   cls, fmtUSD, fmtDate, fmtLongDate,
   Badge, SeverityBadge, Card, Btn, I,
@@ -54,7 +54,17 @@ function BorrowerHeader({ onEmailBorrower }: { onEmailBorrower?: () => void }) {
 
 /* ── SummaryTab ─────────────────────────────────────────────────────────────── */
 
-export function SummaryTab() {
+export function SummaryTab({
+  showBanner = true,
+  onRequestStatement,
+  onDismissBanner,
+  onJumpToAudit,
+}: {
+  showBanner?: boolean;
+  onRequestStatement?: () => void;
+  onDismissBanner?: () => void;
+  onJumpToAudit?: () => void;
+}) {
   const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
 
   const monthlyTx = useMemo(() => {
@@ -80,7 +90,7 @@ export function SummaryTab() {
   return (
     <div className="space-y-4">
       {/* Coverage banner */}
-      {missingMonths.length > 0 && (
+      {showBanner && missingMonths.length > 0 && (
         <Card className="border-amber-200 bg-amber-50 px-5 py-4">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 text-amber-600">{I.alert}</span>
@@ -93,8 +103,8 @@ export function SummaryTab() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Btn variant="secondary" className="text-xs">Request from borrower</Btn>
-              <Btn variant="ghost" className="text-xs">I&rsquo;ll handle it</Btn>
+              <Btn variant="secondary" className="text-xs" onClick={onRequestStatement}>Request from borrower</Btn>
+              <Btn variant="ghost" className="text-xs" onClick={onDismissBanner}>I&rsquo;ll handle it</Btn>
             </div>
           </div>
         </Card>
@@ -208,7 +218,7 @@ export function SummaryTab() {
                     })}
                   </div>
                   <div className="mt-3 flex items-center gap-1 text-xs font-medium text-[#eb7230]">
-                    <span className="cursor-pointer hover:underline">View in audit trail</span>
+                    <button type="button" className="hover:underline" onClick={onJumpToAudit}>View in audit trail</button>
                     <span>{I.arrowRight}</span>
                   </div>
                 </div>
@@ -243,8 +253,18 @@ function ChainNodeDot({ sourced }: { sourced: boolean }) {
   );
 }
 
-export function SourcingTab() {
-  const [activeChainId, setActiveChainId] = useState<string>(sourcingChains[0].id);
+export function SourcingTab({
+  onEmailBorrower,
+  onExportTrail,
+}: {
+  onEmailBorrower?: (ctx: DepositContext) => void;
+  onExportTrail?: (chain: SourcingChain) => void;
+}) {
+  const [searchParams] = useSearchParams();
+  const chainParam = searchParams.get('chain');
+  const [activeChainId, setActiveChainId] = useState<string>(
+    (chainParam && sourcingChains.find((c) => c.id === chainParam)) ? chainParam : sourcingChains[0].id,
+  );
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
   const activeChain = sourcingChains.find((c) => c.id === activeChainId)!;
 
@@ -307,8 +327,8 @@ export function SourcingTab() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Btn variant="secondary" className="text-xs">{I.mail} Email borrower</Btn>
-              <Btn variant="ghost" className="text-xs">{I.download} Export trail</Btn>
+              <Btn variant="secondary" className="text-xs" onClick={() => onEmailBorrower?.({ amount: activeChain.target_amount, date: fmtDate(activeChain.target_date), desc: activeChain.title, account: activeChain.target_account })}>{I.mail} Email borrower</Btn>
+              <Btn variant="ghost" className="text-xs" onClick={() => onExportTrail?.(activeChain)}>{I.download} Export trail</Btn>
             </div>
           </div>
 
@@ -386,6 +406,8 @@ function SourceStatusBadge({ status }: { status: string }) {
 }
 
 export function LargeDepositsTab({ onEmail }: { onEmail?: (template: EmailTemplate, ctx?: DepositContext) => void }) {
+  const navigate = useNavigate();
+  const { jobId } = useParams<{ jobId: string }>();
   const [waivedIds, setWaivedIds] = useState<Set<string>>(new Set());
   const threshold = borrower.monthly_gross_income * (borrower.large_deposit_threshold_pct / 100);
   const bySeverity = {
@@ -461,14 +483,14 @@ export function LargeDepositsTab({ onEmail }: { onEmail?: (template: EmailTempla
                           {d.source_status === 'UNSOURCED' && (
                             <>
                               <Btn variant="ghost" className="h-7 px-2 text-xs" onClick={() => onEmail?.('sourcing', { amount: d.amount, date: fmtDate(d.date), desc: d.desc, account: d.account })}>{I.mail}</Btn>
-                              <Btn variant="primary" className="h-7 px-2 text-xs" onClick={() => alert('Trace feature coming soon')}>{I.branch} Trace</Btn>
+                              <Btn variant="primary" className="h-7 px-2 text-xs" onClick={() => navigate(`/jobs/${jobId}/sourcing${d.chain_id ? `?chain=${d.chain_id}` : ''}`)}>{I.branch} Trace</Btn>
                             </>
                           )}
                           {d.source_status === 'PENDING_LETTER' && (
                             <Btn variant="primary" className="h-7 px-2 text-xs" onClick={() => onEmail?.('gift-letter')}>{I.mail} Request letter</Btn>
                           )}
                           {d.source_status === 'AUTO_SOURCED' && (
-                            <Btn variant="ghost" className="h-7 px-2 text-xs">{I.link} View trail</Btn>
+                            <Btn variant="ghost" className="h-7 px-2 text-xs" onClick={() => navigate(`/jobs/${jobId}/sourcing${d.chain_id ? `?chain=${d.chain_id}` : ''}`)}>{I.link} View trail</Btn>
                           )}
                           {d.source_status === 'BELOW_THRESHOLD' && (
                             <Btn variant="ghost" className="h-7 px-2 text-xs" onClick={() => setWaivedIds((prev) => new Set(prev).add(d.id))}>{I.x} Waive</Btn>
@@ -492,7 +514,8 @@ export function LargeDepositsTab({ onEmail }: { onEmail?: (template: EmailTempla
 type TabId = 'summary' | 'sourcing' | 'large-deposits' | 'undisclosed' | 'audit' | 'coverage';
 
 export default function Workbench() {
-  const { jobId: _jobId, '*': subPath } = useParams<{ jobId: string; '*': string }>();
+  const { jobId, '*': subPath } = useParams<{ jobId: string; '*': string }>();
+  const navigate = useNavigate();
 
   // Derive active tab from URL path suffix
   const rawTab = subPath || 'summary';
@@ -507,6 +530,7 @@ export default function Workbench() {
   };
   const activeTab: TabId = tabMap[rawTab] || 'summary';
 
+  const [dismissedBanner, setDismissedBanner] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [emailTemplate, setEmailTemplate] = useState<EmailTemplate>('missing-statement');
   const [emailDepositContext, setEmailDepositContext] = useState<DepositContext | undefined>(undefined);
@@ -524,8 +548,28 @@ export default function Workbench() {
         <div className="flex flex-col">
           <BorrowerHeader onEmailBorrower={() => openEmail('sourcing')} />
           <div className="px-7 py-5">
-            {activeTab === 'summary' && <SummaryTab />}
-            {activeTab === 'sourcing' && <SourcingTab />}
+            {activeTab === 'summary' && (
+              <SummaryTab
+                showBanner={!dismissedBanner}
+                onRequestStatement={() => openEmail('request-statements')}
+                onDismissBanner={() => setDismissedBanner(true)}
+                onJumpToAudit={() => navigate(`/jobs/${jobId ?? ''}/audit`)}
+              />
+            )}
+            {activeTab === 'sourcing' && (
+              <SourcingTab
+                onEmailBorrower={(ctx) => openEmail('sourcing', ctx)}
+                onExportTrail={(chain) => {
+                  const blob = new Blob([JSON.stringify(chain, null, 2)], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${chain.id}-trail.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+              />
+            )}
             {activeTab === 'large-deposits' && <LargeDepositsTab onEmail={openEmail} />}
             {activeTab === 'undisclosed' && <UndisclosedTab />}
             {activeTab === 'audit' && <AuditTab />}
