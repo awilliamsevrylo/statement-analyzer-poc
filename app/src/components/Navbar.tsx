@@ -8,6 +8,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { cls } from './UI';
 import { useAppContext } from '@/app/_components/AppContext';
+import { totalUnresolvedDecisions } from '@/data/inbox';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -16,6 +17,8 @@ export default function Navbar() {
   const { openNewAnalysis } = useAppContext();
 
   const isFilesActive = pathname === '/' || pathname.startsWith('/jobs/');
+  const isInboxActive = pathname?.startsWith('/inbox') ?? false;
+  const unread = totalUnresolvedDecisions();
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 bg-white px-7 py-4">
@@ -39,6 +42,29 @@ export default function Navbar() {
             )}
           >
             Files
+          </Link>
+          <Link
+            href="/inbox"
+            className={cls(
+              'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              isInboxActive
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+            )}
+          >
+            Inbox
+            {unread > 0 && (
+              <span
+                className={cls(
+                  'inline-flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-semibold tabular-nums',
+                  isInboxActive
+                    ? 'bg-white/20 text-white'
+                    : 'bg-rose-100 text-rose-700',
+                )}
+              >
+                {unread}
+              </span>
+            )}
           </Link>
           {(['Templates', 'Settings'] as const).map((label) => (
             <a
