@@ -23,7 +23,7 @@ export default function SideNav({ activeTab = 'summary' }: { activeTab?: string 
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-slate-200 px-5 py-4">
-        <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Current file</div>
+        <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Current borrower</div>
         <div className="mt-1 text-sm font-semibold text-slate-900">Marcus Chen</div>
         <div className="mt-0.5 text-xs text-slate-500">{jobId}</div>
       </div>

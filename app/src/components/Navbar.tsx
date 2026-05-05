@@ -41,7 +41,7 @@ export default function Navbar() {
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
             )}
           >
-            Files
+            Borrowers
           </Link>
           <Link
             href="/inbox"
@@ -86,7 +86,7 @@ export default function Navbar() {
         <div className="relative hidden sm:block">
           <input
             type="text"
-            placeholder="Search files…"
+            placeholder="Search borrowers…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {

@@ -42,7 +42,7 @@ function DashboardContent() {
   }, [activeFilter, q]);
 
   const stats = useMemo(() => [
-    { label: 'Total files', value: filtered.length },
+    { label: 'Total borrowers', value: filtered.length },
     { label: 'Processing', value: filtered.filter((f) => f.status === 'processing').length },
     { label: 'Completed', value: filtered.filter((f) => f.status === 'completed').length },
     { label: 'Failed', value: filtered.filter((f) => f.status === 'failed').length },
@@ -55,7 +55,7 @@ function DashboardContent() {
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs font-medium uppercase tracking-wide text-slate-500">Evrylo</div>
-            <h1 className="mt-0.5 text-xl font-semibold text-slate-900">All files</h1>
+            <h1 className="mt-0.5 text-xl font-semibold text-slate-900">All borrowers</h1>
           </div>
           <Btn variant="primary" onClick={openNewAnalysis}>New analysis</Btn>
         </div>
@@ -111,9 +111,9 @@ function DashboardContent() {
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-500">
                     {q ? (
-                      <>No files match &ldquo;<span className="font-medium">{q}</span>&rdquo;.</>
+                      <>No borrowers match &ldquo;<span className="font-medium">{q}</span>&rdquo;.</>
                     ) : (
-                      'No files.'
+                      'No borrowers.'
                     )}
                   </td>
                 </tr>
